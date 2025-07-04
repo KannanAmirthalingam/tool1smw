@@ -117,10 +117,10 @@ const InwardModal: React.FC<InwardModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden">
-          {/* Compact Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-green-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col">
+          {/* Fixed Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-green-50 rounded-t-xl flex-shrink-0">
             <div className="flex items-center space-x-3">
               <ArrowDownCircle className="text-green-600" size={20} />
               <div>
@@ -136,8 +136,8 @@ const InwardModal: React.FC<InwardModalProps> = ({
             </button>
           </div>
 
-          {/* Compact Search and Controls */}
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
+          {/* Fixed Search and Controls */}
+          <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <div className="flex gap-3">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
@@ -152,13 +152,13 @@ const InwardModal: React.FC<InwardModalProps> = ({
               <button
                 type="button"
                 onClick={handleSelectAll}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm whitespace-nowrap"
               >
                 {selectedEntries.length === filteredEntries.length ? 'Deselect All' : 'Select All'}
               </button>
             </div>
 
-            {/* Compact Summary */}
+            {/* Summary */}
             <div className="mt-3 flex items-center justify-between text-xs">
               <div className="flex space-x-4">
                 <span className="text-gray-600">Selected: <strong className="text-green-600">{getSelectedCount()}</strong></span>
@@ -170,9 +170,9 @@ const InwardModal: React.FC<InwardModalProps> = ({
             </div>
           </div>
 
-          {/* Compact Content */}
-          <div className="flex-1 overflow-y-auto" style={{ height: 'calc(90vh - 200px)' }}>
-            <form onSubmit={handleSubmit} className="p-4 space-y-3">
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="p-4 space-y-3">
               {Object.keys(groupedEntries).length === 0 ? (
                 <div className="text-center py-8">
                   <CheckCircle className="mx-auto h-8 w-8 text-green-500 mb-2" />
@@ -188,7 +188,7 @@ const InwardModal: React.FC<InwardModalProps> = ({
 
                   return (
                     <div key={empId} className="border border-gray-200 rounded-lg overflow-hidden">
-                      {/* Compact Employee Header */}
+                      {/* Employee Header */}
                       <div className="bg-blue-50 p-3 border-b border-gray-200">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -214,7 +214,7 @@ const InwardModal: React.FC<InwardModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Compact Tools List */}
+                      {/* Tools List */}
                       <div className="divide-y divide-gray-200">
                         {entries.map((entry) => {
                           const daysIssued = getDaysIssued(entry.issued_date);
@@ -272,27 +272,27 @@ const InwardModal: React.FC<InwardModalProps> = ({
                 })
               )}
 
-              {/* Compact Remarks */}
+              {/* Remarks Section */}
               {selectedEntries.length > 0 && (
-                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200 sticky bottom-0 z-10">
                   <label className="block text-sm font-medium text-green-800 mb-2">
                     Return Remarks (for {selectedEntries.length} tool{selectedEntries.length > 1 ? 's' : ''})
                   </label>
                   <textarea
                     value={globalRemarks}
                     onChange={(e) => setGlobalRemarks(e.target.value)}
-                    className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
-                    rows={2}
+                    className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm resize-none"
+                    rows={3}
                     placeholder="Tool condition, damage notes, etc..."
                   />
                 </div>
               )}
-            </form>
+            </div>
           </div>
 
-          {/* Compact Footer - Always Visible */}
+          {/* Fixed Footer */}
           {filteredEntries.length > 0 && (
-            <div className="flex space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex space-x-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex-shrink-0">
               <button
                 type="button"
                 onClick={handleClose}
