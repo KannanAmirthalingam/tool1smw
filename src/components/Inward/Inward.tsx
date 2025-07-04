@@ -120,7 +120,7 @@ const Inward: React.FC = () => {
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Overdue (>30 days)</p>
+              <p className="text-sm text-gray-600">Overdue ({'>'}30 days)</p>
               <p className="text-2xl font-bold text-red-600">
                 {filteredEntries.filter((entry: OutwardEntry) => 
                   getDaysIssued(entry.issued_date) > 30
