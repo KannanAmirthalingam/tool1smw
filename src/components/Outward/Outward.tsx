@@ -10,7 +10,6 @@ interface ToolSelection {
   category_id: string;
   tool_id: string;
   tool_part_id: string;
-  quantity: number;
   remarks: string;
 }
 
@@ -62,27 +61,24 @@ const Outward: React.FC = () => {
           continue;
         }
 
-        // Create outward entry for each quantity
-        for (let i = 0; i < selection.quantity; i++) {
-          const outwardData = {
-            emp_id: employee.emp_id,
-            emp_name: employee.emp_name,
-            group: employee.group,
-            destination: employee.destination,
-            tool_id: tool.id,
-            tool_name: tool.tool_name,
-            tool_part_id: toolPart.id,
-            tool_unique_id: toolPart.unique_id,
-            category_id: tool.category_id,
-            category_name: tool.category_name,
-            issued_date: new Date(),
-            status: 'issued',
-            remarks: selection.remarks,
-            quantity: 1 // Each entry represents 1 unit
-          };
+        // Create outward entry
+        const outwardData = {
+          emp_id: employee.emp_id,
+          emp_name: employee.emp_name,
+          group: employee.group,
+          destination: employee.destination,
+          tool_id: tool.id,
+          tool_name: tool.tool_name,
+          tool_part_id: toolPart.id,
+          tool_unique_id: toolPart.unique_id,
+          category_id: tool.category_id,
+          category_name: tool.category_name,
+          issued_date: new Date(),
+          status: 'issued',
+          remarks: selection.remarks
+        };
 
-          await addDocument(outwardData);
-        }
+        await addDocument(outwardData);
 
         // Update tool part status
         await updateToolPart(toolPart.id, {
