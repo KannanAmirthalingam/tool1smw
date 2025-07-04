@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, User, ChevronDown, Edit3, Phone, Mail, IdCard } from 'lucide-react';
+import { Bell, User, ChevronDown, Edit3, Phone, Mail, Car as IdCard } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import SecurityModal from '../Common/SecurityModal';
 
