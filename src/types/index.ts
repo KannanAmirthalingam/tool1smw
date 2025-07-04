@@ -50,6 +50,7 @@ export interface OutwardEntry {
   category_name: string;
   issued_date: Date;
   status: 'issued' | 'returned';
+  quantity?: number; // Added for multi-quantity support
   remarks?: string;
   created_at: Date;
 }

@@ -5,6 +5,7 @@ interface Option {
   value: string;
   label: string;
   disabled?: boolean;
+  subtitle?: string;
 }
 
 interface SearchableSelectProps {
@@ -16,6 +17,7 @@ interface SearchableSelectProps {
   disabled?: boolean;
   loading?: boolean;
   required?: boolean;
+  error?: string;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -26,16 +28,19 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   label,
   disabled = false,
   loading = false,
-  required = false
+  required = false,
+  error
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
   
   const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (option.subtitle && option.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleSelect = (optionValue: string) => {
@@ -48,6 +53,15 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     e.stopPropagation();
     onChange('');
     setSearchTerm('');
+  };
+
+  const handleToggle = () => {
+    if (!disabled && !loading) {
+      setIsOpen(!isOpen);
+      if (!isOpen) {
+        setTimeout(() => inputRef.current?.focus(), 100);
+      }
+    }
   };
 
   useEffect(() => {
@@ -71,20 +85,32 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
       <div className="relative">
         <button
           type="button"
-          onClick={() => !disabled && !loading && setIsOpen(!isOpen)}
+          onClick={handleToggle}
           disabled={disabled || loading}
           className={`
-            w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-left
+            w-full px-4 py-3 border rounded-lg bg-white text-left
             focus:ring-2 focus:ring-blue-500 focus:border-transparent
             disabled:bg-gray-100 disabled:cursor-not-allowed
             hover:border-gray-400 transition-colors
             flex items-center justify-between
+            ${error ? 'border-red-300' : 'border-gray-300'}
           `}
         >
-          <span className={selectedOption ? 'text-gray-800' : 'text-gray-500'}>
-            {loading ? 'Loading...' : (selectedOption?.label || placeholder)}
-          </span>
-          <div className="flex items-center space-x-2">
+          <div className="flex-1 min-w-0">
+            {loading ? (
+              <span className="text-gray-500">Loading...</span>
+            ) : selectedOption ? (
+              <div>
+                <div className="text-gray-800 truncate">{selectedOption.label}</div>
+                {selectedOption.subtitle && (
+                  <div className="text-sm text-gray-500 truncate">{selectedOption.subtitle}</div>
+                )}
+              </div>
+            ) : (
+              <span className="text-gray-500">{placeholder}</span>
+            )}
+          </div>
+          <div className="flex items-center space-x-2 ml-2">
             {selectedOption && !disabled && (
               <X 
                 size={16} 
@@ -100,24 +126,24 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+          <div className="absolute z-30 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-hidden">
             {/* Search Input */}
             <div className="p-3 border-b border-gray-200">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                 <input
+                  ref={inputRef}
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  autoFocus
                 />
               </div>
             </div>
 
             {/* Options List */}
-            <div className="max-h-60 overflow-y-auto">
+            <div className="max-h-48 overflow-y-auto">
               {filteredOptions.length === 0 ? (
                 <div className="px-4 py-3 text-gray-500 text-center text-sm">
                   No options found
@@ -130,12 +156,15 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     onClick={() => handleSelect(option.value)}
                     disabled={option.disabled}
                     className={`
-                      w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors text-sm
+                      w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors
                       ${option.disabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-800'}
                       ${value === option.value ? 'bg-blue-50 text-blue-600' : ''}
                     `}
                   >
-                    {option.label}
+                    <div className="truncate">{option.label}</div>
+                    {option.subtitle && (
+                      <div className="text-sm text-gray-500 truncate">{option.subtitle}</div>
+                    )}
                   </button>
                 ))
               )}
@@ -143,6 +172,10 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           </div>
         )}
       </div>
+
+      {error && (
+        <p className="mt-1 text-sm text-red-600">{error}</p>
+      )}
     </div>
   );
 };
