@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUpCircle, Plus, Search, User, Package, Calendar } from 'lucide-react';
+import { ArrowUpCircle, Plus, Search, User, Package, Calendar, Grid3X3, List } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import OutwardModal from './OutwardModal';
 import { Employee, ToolCategory, Tool, ToolPart, OutwardEntry } from '../../types';
@@ -23,6 +23,7 @@ const Outward: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
 
   const filteredOutwardEntries = outwardEntries.filter((entry: OutwardEntry) => {
     const matchesSearch = entry.emp_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -132,7 +133,7 @@ const Outward: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 items-center">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
@@ -154,6 +155,32 @@ const Outward: React.FC = () => {
             <option value="week">This Week</option>
             <option value="month">This Month</option>
           </select>
+          
+          {/* View Toggle */}
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
+                viewMode === 'table' 
+                  ? 'bg-white text-orange-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-orange-600'
+              }`}
+            >
+              <List size={16} />
+              <span className="text-sm font-medium">Table</span>
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
+                viewMode === 'card' 
+                  ? 'bg-white text-orange-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-orange-600'
+              }`}
+            >
+              <Grid3X3 size={16} />
+              <span className="text-sm font-medium">Cards</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -215,91 +242,186 @@ const Outward: React.FC = () => {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Employee
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tool
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tool ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Issue Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Days Issued
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Remarks
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+        {viewMode === 'table' ? (
+          /* Table View */
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tool
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Employee
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tool ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Issue Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Days Issued
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Remarks
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredOutwardEntries.map((entry: OutwardEntry) => {
+                  const daysIssued = getDaysIssued(entry.issued_date);
+
+                  return (
+                    <tr key={entry.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {entry.tool_image_url ? (
+                            <img 
+                              src={entry.tool_image_url} 
+                              alt={entry.tool_name}
+                              className="w-10 h-10 object-cover rounded-lg border mr-3"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <Package className="text-gray-400 mr-3" size={20} />
+                          )}
+                          <div className="text-sm font-medium text-gray-800">{entry.tool_name}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <User className="text-blue-600" size={16} />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-800">{entry.emp_name}</div>
+                            <div className="text-xs text-gray-600">{entry.group} • {entry.destination}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-blue-600 font-mono">{entry.tool_unique_id}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-600">{entry.category_name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-600">
+                          {new Date(entry.issued_date).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(daysIssued)}`}>
+                          {daysIssued} days
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+                          Issued
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-600 max-w-xs truncate">
+                          {entry.remarks || 'No remarks'}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          /* Card View */
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredOutwardEntries.map((entry: OutwardEntry) => {
                 const daysIssued = getDaysIssued(entry.issued_date);
 
                 return (
-                  <tr key={entry.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="text-blue-600" size={20} />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-800">{entry.emp_name}</div>
-                          <div className="text-sm text-gray-600">{entry.group} • {entry.destination}</div>
-                        </div>
+                  <div key={entry.id} className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200">
+                    {/* Tool Image */}
+                    {entry.tool_image_url && (
+                      <div className="mb-4">
+                        <img 
+                          src={entry.tool_image_url} 
+                          alt={entry.tool_name}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Package className="text-gray-400 mr-2" size={16} />
-                        <div className="text-sm font-medium text-gray-800">{entry.tool_name}</div>
+                    )}
+
+                    {/* Tool Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-800 mb-1">{entry.tool_name}</h3>
+                        <p className="text-sm text-blue-600 font-mono font-medium">{entry.tool_unique_id}</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-blue-600 font-mono">{entry.tool_unique_id}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">{entry.category_name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">
-                        {new Date(entry.issued_date).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(daysIssued)}`}>
-                        {daysIssued} days
+                      <span className={`px-3 py-1 text-xs rounded-full ${getStatusColor(daysIssued)}`}>
+                        {daysIssued}d
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
-                        Issued
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600 max-w-xs truncate">
-                        {entry.remarks || 'No remarks'}
+                    </div>
+
+                    {/* Employee Info */}
+                    <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                      <div className="flex items-center mb-2">
+                        <User className="text-blue-600 mr-2" size={16} />
+                        <span className="text-sm font-medium text-blue-800">Issued To</span>
                       </div>
-                    </td>
-                  </tr>
+                      <div className="text-sm text-blue-900 font-semibold">{entry.emp_name}</div>
+                      <div className="text-xs text-blue-700">{entry.group} • {entry.destination}</div>
+                    </div>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Category:</span>
+                        <div className="font-medium text-gray-800">{entry.category_name}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Issue Date:</span>
+                        <div className="font-medium text-gray-800">
+                          {new Date(entry.issued_date).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status and Remarks */}
+                    <div className="pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full font-medium">
+                          Issued
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {daysIssued} days ago
+                        </span>
+                      </div>
+                      {entry.remarks && (
+                        <div className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                          <strong>Remarks:</strong> {entry.remarks}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+        )}
 
         {filteredOutwardEntries.length === 0 && (
           <div className="text-center py-12">
