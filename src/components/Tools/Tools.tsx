@@ -21,7 +21,8 @@ const Tools: React.FC = () => {
     category_id: '',
     total_quantity: 0,
     available_quantity: 0,
-    description: ''
+    description: '',
+    image_url: ''
   });
 
   const filteredTools = tools.filter((tool: Tool) => {
@@ -36,6 +37,7 @@ const Tools: React.FC = () => {
   };
 
   const createToolParts = async (toolId: string, toolName: string, categoryId: string, categoryName: string, quantity: number) => {
+    const tool = tools.find(t => t.id === toolId) || formData;
     const promises = [];
     for (let i = 0; i < quantity; i++) {
       const uniqueId = generateUniqueToolId(toolName, i);
@@ -45,7 +47,8 @@ const Tools: React.FC = () => {
         category_id: categoryId,
         category_name: categoryName,
         unique_id: uniqueId,
-        status: 'available'
+        status: 'available',
+        image_url: tool.image_url || ''
       }));
     }
     await Promise.all(promises);
@@ -88,7 +91,8 @@ const Tools: React.FC = () => {
                 category_id: formData.category_id,
                 category_name: selectedCategoryData?.category_name || '',
                 unique_id: uniqueId,
-                status: 'available'
+                status: 'available',
+                image_url: formData.image_url || ''
               });
             }
           } else if (newQuantity < currentParts.length) {
@@ -113,7 +117,7 @@ const Tools: React.FC = () => {
         
         setIsModalOpen(false);
         setEditingTool(null);
-        setFormData({ tool_name: '', category_id: '', total_quantity: 0, available_quantity: 0, description: '' });
+        setFormData({ tool_name: '', category_id: '', total_quantity: 0, available_quantity: 0, description: '', image_url: '' });
       } catch (error) {
         console.error('Error saving tool:', error);
       }
@@ -132,7 +136,8 @@ const Tools: React.FC = () => {
       category_id: tool.category_id,
       total_quantity: tool.total_quantity,
       available_quantity: tool.available_quantity,
-      description: (tool as any).description || ''
+      description: (tool as any).description || '',
+      image_url: tool.image_url || ''
     });
     setIsModalOpen(true);
   };
@@ -156,7 +161,7 @@ const Tools: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingTool(null);
-    setFormData({ tool_name: '', category_id: '', total_quantity: 0, available_quantity: 0, description: '' });
+    setFormData({ tool_name: '', category_id: '', total_quantity: 0, available_quantity: 0, description: '', image_url: '' });
   };
 
   const getStockStatus = (available: number, total: number) => {
@@ -233,6 +238,21 @@ const Tools: React.FC = () => {
           
           return (
             <div key={tool.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              {/* Tool Image */}
+              {tool.image_url && (
+                <div className="mb-4">
+                  <img 
+                    src={tool.image_url} 
+                    alt={tool.tool_name}
+                    className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-800 mb-1">{tool.tool_name}</h3>
@@ -383,6 +403,21 @@ const Tools: React.FC = () => {
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Each unit will get a unique ID (Q1, Q2, Q3, etc.)
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tool Image URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://example.com/tool-image.jpg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter a valid image URL to display tool photo
                   </p>
                 </div>
                 <div>

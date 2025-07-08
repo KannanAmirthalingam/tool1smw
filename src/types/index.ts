@@ -22,6 +22,7 @@ export interface Tool {
   category_name: string;
   total_quantity: number;
   available_quantity: number;
+  image_url?: string;
   created_at: Date;
 }
 
@@ -33,6 +34,7 @@ export interface ToolPart {
   category_name: string;
   unique_id: string; // Auto-generated like ToolIDQ1, ToolIDQ2, etc.
   status: 'available' | 'issued' | 'maintenance';
+  image_url?: string;
   created_at: Date;
 }
 
