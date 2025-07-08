@@ -230,7 +230,19 @@ const History: React.FC = () => {
                   <tr key={entry.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <Package className="text-gray-400 mr-3" size={16} />
+                        {(entry as any).tool_image_url ? (
+                          <img 
+                            src={(entry as any).tool_image_url} 
+                            alt={entry.tool_name}
+                            className="w-8 h-8 object-cover rounded border mr-3"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <Package className="text-gray-400 mr-3" size={16} />
+                        )}
                         <div>
                           <div className="text-sm font-medium text-gray-800">{entry.tool_name}</div>
                         </div>

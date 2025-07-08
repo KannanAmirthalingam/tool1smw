@@ -416,6 +416,21 @@ const OutwardModal: React.FC<OutwardModalProps> = ({
                         {/* Selected Tool Details */}
                         {selectedToolPart && selectedTool && (
                           <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+                            {/* Tool Image Preview */}
+                            {selectedTool.image_url && (
+                              <div className="mb-3">
+                                <img 
+                                  src={selectedTool.image_url} 
+                                  alt={selectedTool.tool_name}
+                                  className="w-16 h-16 object-cover rounded-lg border border-green-300"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
+                            
                             <div className="flex items-center mb-3">
                               <CheckCircle className="text-green-600 mr-2" size={18} />
                               <h6 className="font-bold text-green-800">Selected Tool Details</h6>

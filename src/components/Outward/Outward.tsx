@@ -73,6 +73,7 @@ const Outward: React.FC = () => {
           tool_unique_id: toolPart.unique_id,
           category_id: tool.category_id,
           category_name: tool.category_name,
+          tool_image_url: tool.image_url || '',
           issued_date: new Date(),
           status: 'issued',
           remarks: selection.remarks

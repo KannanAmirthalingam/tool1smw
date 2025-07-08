@@ -239,7 +239,19 @@ const InwardModal: React.FC<InwardModalProps> = ({
                                 
                                 <div className="flex-1 grid grid-cols-4 gap-3 text-xs">
                                   <div className="flex items-center space-x-2">
-                                    <Package className="text-gray-400" size={12} />
+                                    {entry.tool_image_url ? (
+                                      <img 
+                                        src={entry.tool_image_url} 
+                                        alt={entry.tool_name}
+                                        className="w-6 h-6 object-cover rounded border"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                        }}
+                                      />
+                                    ) : (
+                                      <Package className="text-gray-400" size={12} />
+                                    )}
                                     <div>
                                       <div className="font-medium text-gray-800">{entry.tool_name}</div>
                                       <div className="text-gray-500">{entry.category_name}</div>

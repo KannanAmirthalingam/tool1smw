@@ -78,6 +78,7 @@ export interface ToolHistory {
   destination: string;
   issued_date: Date;
   returned_date: Date;
+  tool_image_url?: string;
   remarks?: string;
   created_at: Date;
 }

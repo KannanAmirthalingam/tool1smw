@@ -52,6 +52,7 @@ const Inward: React.FC = () => {
           destination: entry.destination,
           issued_date: entry.issued_date,
           returned_date: new Date(),
+          tool_image_url: entry.tool_image_url || '',
           remarks: remarks
         });
       }
