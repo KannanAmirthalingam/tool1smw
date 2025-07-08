@@ -239,6 +239,9 @@ const Dashboard: React.FC = () => {
                       <tr key={tool.id} className="hover:bg-gray-50">
                         <td className="px-4 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-800">{tool.tool_name}</div>
+                          <div className="text-xs text-gray-500 font-mono">
+                            IDs: {tool.tool_name.replace(/\s+/g, '-').toUpperCase()}-Q1, Q2, Q3...
+                          </div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-600">{totalParts}</div>

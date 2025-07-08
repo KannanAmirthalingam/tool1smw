@@ -305,24 +305,28 @@ const Tools: React.FC = () => {
 
               {/* Show some tool part IDs */}
               <div className="mt-3 pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-1">Sample IDs:</p>
+                <p className="text-xs text-gray-500 mb-2">Tool IDs ({toolParts.filter((part: ToolPart) => part.tool_id === tool.id).length} total):</p>
                 <div className="flex flex-wrap gap-1">
                   {toolParts
                     .filter((part: ToolPart) => part.tool_id === tool.id)
-                    .slice(0, 3)
+                    .slice(0, 4)
                     .map((part: ToolPart) => (
                       <span 
                         key={part.id} 
-                        className={`px-2 py-1 text-xs rounded ${
+                        className={`px-2 py-1 text-xs rounded font-mono ${
                           part.status === 'available' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
                         }`}
                       >
                         {part.unique_id}
                       </span>
                     ))}
-                  {toolParts.filter((part: ToolPart) => part.tool_id === tool.id).length > 3 && (
-                    <span className="text-xs text-gray-400">+{toolParts.filter((part: ToolPart) => part.tool_id === tool.id).length - 3} more</span>
+                  {toolParts.filter((part: ToolPart) => part.tool_id === tool.id).length > 4 && (
+                    <span className="text-xs text-gray-400 px-2 py-1">+{toolParts.filter((part: ToolPart) => part.tool_id === tool.id).length - 4} more</span>
                   )}
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  <span className="inline-block w-2 h-2 bg-green-100 rounded mr-1"></span>Available
+                  <span className="inline-block w-2 h-2 bg-orange-100 rounded mr-1 ml-3"></span>Issued
                 </div>
               </div>
             </div>

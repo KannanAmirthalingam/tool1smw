@@ -260,7 +260,7 @@ const InwardModal: React.FC<InwardModalProps> = ({
 
                                   <div>
                                     <div className="text-gray-500">Tool ID</div>
-                                    <div className="font-mono text-blue-600 font-medium">{entry.tool_unique_id}</div>
+                                    <div className="font-mono text-blue-600 font-bold text-sm">{entry.tool_unique_id}</div>
                                   </div>
 
                                   <div>

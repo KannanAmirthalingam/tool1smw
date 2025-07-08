@@ -319,7 +319,7 @@ const OutwardModal: React.FC<OutwardModalProps> = ({
                     const toolPartOptions = availableToolParts.map(part => ({
                       value: part.id,
                       label: part.unique_id,
-                      subtitle: 'Available for issue'
+                      subtitle: `${selectedTool?.tool_name} - Available for issue`
                     }));
 
                     return (
