@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowUpCircle, Plus, Search, User, Package, Calendar, Grid3X3, List } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import OutwardModal from './OutwardModal';
+import ImageModal from '../Common/ImageModal';
 import { Employee, ToolCategory, Tool, ToolPart, OutwardEntry } from '../../types';
 
 interface ToolSelection {
@@ -24,6 +25,7 @@ const Outward: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', toolName: '' });
 
   const filteredOutwardEntries = outwardEntries.filter((entry: OutwardEntry) => {
     const matchesSearch = entry.emp_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,6 +108,10 @@ const Outward: React.FC = () => {
     if (days > 30) return 'bg-red-100 text-red-800';
     if (days > 14) return 'bg-orange-100 text-orange-800';
     return 'bg-yellow-100 text-yellow-800';
+  };
+
+  const handleImageClick = (imageUrl: string, toolName: string) => {
+    setImageModal({ isOpen: true, imageUrl, toolName });
   };
 
   const todayIssues = outwardEntries.filter((entry: OutwardEntry) => {
@@ -286,7 +292,8 @@ const Outward: React.FC = () => {
                             <img 
                               src={entry.tool_image_url} 
                               alt={entry.tool_name}
-                              className="w-10 h-10 object-cover rounded-lg border mr-3"
+                              className="w-10 h-10 object-cover rounded-lg border mr-3 cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => handleImageClick(entry.tool_image_url!, entry.tool_name)}
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = 'none';
@@ -356,7 +363,8 @@ const Outward: React.FC = () => {
                         <img 
                           src={entry.tool_image_url} 
                           alt={entry.tool_name}
-                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => handleImageClick(entry.tool_image_url!, entry.tool_name)}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
@@ -443,6 +451,14 @@ const Outward: React.FC = () => {
         tools={tools}
         toolParts={toolParts}
         onSubmit={handleSubmit}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModal.isOpen}
+        onClose={() => setImageModal({ isOpen: false, imageUrl: '', toolName: '' })}
+        imageUrl={imageModal.imageUrl}
+        toolName={imageModal.toolName}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { History as HistoryIcon, Search, User, Package, Calendar, Download, Filter } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
+import ImageModal from '../Common/ImageModal';
 import { ToolHistory } from '../../types';
 import { format } from 'date-fns';
 
@@ -9,6 +10,7 @@ const History: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [sortBy, setSortBy] = useState('returned_date');
+  const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', toolName: '' });
 
   const filteredHistory = history.filter((entry: ToolHistory) => {
     const matchesSearch = entry.emp_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,6 +76,10 @@ const History: React.FC = () => {
       link.click();
       document.body.removeChild(link);
     }
+  };
+
+  const handleImageClick = (imageUrl: string, toolName: string) => {
+    setImageModal({ isOpen: true, imageUrl, toolName });
   };
 
   if (loading) {
@@ -234,7 +240,8 @@ const History: React.FC = () => {
                           <img 
                             src={(entry as any).tool_image_url} 
                             alt={entry.tool_name}
-                            className="w-8 h-8 object-cover rounded border mr-3"
+                            className="w-8 h-8 object-cover rounded border mr-3 cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => handleImageClick((entry as any).tool_image_url, entry.tool_name)}
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
@@ -301,6 +308,14 @@ const History: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModal.isOpen}
+        onClose={() => setImageModal({ isOpen: false, imageUrl: '', toolName: '' })}
+        imageUrl={imageModal.imageUrl}
+        toolName={imageModal.toolName}
+      />
     </div>
   );
 };

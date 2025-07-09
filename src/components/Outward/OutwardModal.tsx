@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Trash2, X, User, Package, CheckCircle, AlertCircle, Copy } from 'lucide-react';
 import SearchableSelect from '../Common/SearchableSelect';
 import SecurityModal from '../Common/SecurityModal';
+import ImageModal from '../Common/ImageModal';
 import { Employee, ToolCategory, Tool, ToolPart } from '../../types';
 
 interface ToolSelection {
@@ -37,6 +38,7 @@ const OutwardModal: React.FC<OutwardModalProps> = ({
   const [toolSelections, setToolSelections] = useState<ToolSelection[]>([
     { id: '1', emp_id: '', category_id: '', tool_id: '', tool_part_id: '', remarks: '' }
   ]);
+  const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', toolName: '' });
 
   const addToolSelection = () => {
     const newId = Date.now().toString();
@@ -136,6 +138,10 @@ const OutwardModal: React.FC<OutwardModalProps> = ({
     }, {} as Record<string, number>);
 
     return Object.entries(toolCounts).filter(([_, count]) => count > 0);
+  };
+
+  const handleImageClick = (imageUrl: string, toolName: string) => {
+    setImageModal({ isOpen: true, imageUrl, toolName });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -422,7 +428,8 @@ const OutwardModal: React.FC<OutwardModalProps> = ({
                                 <img 
                                   src={selectedTool.image_url} 
                                   alt={selectedTool.tool_name}
-                                  className="w-16 h-16 object-cover rounded-lg border border-green-300"
+                                  className="w-16 h-16 object-cover rounded-lg border border-green-300 cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => handleImageClick(selectedTool.image_url!, selectedTool.tool_name)}
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';
@@ -547,6 +554,14 @@ const OutwardModal: React.FC<OutwardModalProps> = ({
         onVerify={handleSecurityVerify}
         title="Issue Tools"
         message={`Please verify your credentials to issue ${getTotalToolCount()} tool${getTotalToolCount() > 1 ? 's' : ''} to ${selectedEmployeeData?.emp_name}.`}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModal.isOpen}
+        onClose={() => setImageModal({ isOpen: false, imageUrl: '', toolName: '' })}
+        imageUrl={imageModal.imageUrl}
+        toolName={imageModal.toolName}
       />
     </>
   );

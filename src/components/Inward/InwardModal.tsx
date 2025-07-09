@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, Package, User, Calendar, ArrowDownCircle, Search } from 'lucide-react';
 import SecurityModal from '../Common/SecurityModal';
+import ImageModal from '../Common/ImageModal';
 import { OutwardEntry } from '../../types';
 
 interface InwardModalProps {
@@ -20,6 +21,7 @@ const InwardModal: React.FC<InwardModalProps> = ({
   const [globalRemarks, setGlobalRemarks] = useState('');
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', toolName: '' });
 
   // Filter entries based on search
   const filteredEntries = pendingEntries.filter(entry =>
@@ -55,6 +57,10 @@ const InwardModal: React.FC<InwardModalProps> = ({
       const newSelections = employeeEntries.map(entry => entry.id);
       setSelectedEntries(prev => [...new Set([...prev, ...newSelections])]);
     }
+  };
+
+  const handleImageClick = (imageUrl: string, toolName: string) => {
+    setImageModal({ isOpen: true, imageUrl, toolName });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -243,7 +249,8 @@ const InwardModal: React.FC<InwardModalProps> = ({
                                       <img 
                                         src={entry.tool_image_url} 
                                         alt={entry.tool_name}
-                                        className="w-6 h-6 object-cover rounded border"
+                                        className="w-6 h-6 object-cover rounded border cursor-pointer hover:opacity-90 transition-opacity"
+                                        onClick={() => handleImageClick(entry.tool_image_url!, entry.tool_name)}
                                         onError={(e) => {
                                           const target = e.target as HTMLImageElement;
                                           target.style.display = 'none';
@@ -331,6 +338,14 @@ const InwardModal: React.FC<InwardModalProps> = ({
         onVerify={handleSecurityVerify}
         title="Return Tools"
         message={`Please verify your credentials to return ${selectedEntries.length} tool${selectedEntries.length > 1 ? 's' : ''}.`}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModal.isOpen}
+        onClose={() => setImageModal({ isOpen: false, imageUrl: '', toolName: '' })}
+        imageUrl={imageModal.imageUrl}
+        toolName={imageModal.toolName}
       />
     </>
   );

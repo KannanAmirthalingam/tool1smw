@@ -12,6 +12,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
+import ImageModal from '../Common/ImageModal';
 import { Tool, ToolCategory, ToolPart, OutwardEntry } from '../../types';
 
 const Dashboard: React.FC = () => {
@@ -21,6 +22,7 @@ const Dashboard: React.FC = () => {
   const { documents: toolParts } = useFirestore('tool_parts');
   const { documents: outwardEntries } = useFirestore('outward');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', toolName: '' });
 
   // Calculate statistics from tool parts
   const totalToolParts = toolParts.length;
@@ -120,6 +122,10 @@ const Dashboard: React.FC = () => {
       red: 'bg-red-600'
     };
     return colors[color as keyof typeof colors] || colors.blue;
+  };
+
+  const handleImageClick = (imageUrl: string, toolName: string) => {
+    setImageModal({ isOpen: true, imageUrl, toolName });
   };
 
   return (
@@ -366,6 +372,14 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModal.isOpen}
+        onClose={() => setImageModal({ isOpen: false, imageUrl: '', toolName: '' })}
+        imageUrl={imageModal.imageUrl}
+        toolName={imageModal.toolName}
+      />
     </div>
   );
 };
