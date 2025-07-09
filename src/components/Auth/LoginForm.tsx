@@ -1,148 +1,148 @@
-import React, { useState } from 'react';
-import { Lock, User, Eye, EyeOff, Shield } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useState, useEffect, createContext, useContext } from 'react';
 
-const LoginForm: React.FC = () => {
-  const { login, loading, error } = useAuth();
-  const [formData, setFormData] = useState({
-    email: 'storeadmin@toolinventory.com',
-    password: 'Admin@123'
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState('');
+// Simple user type
+interface User {
+  email: string;
+  isAuthenticated: boolean;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
+// Auth context type
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  loading: boolean;
+  error: string;
+}
+
+// Create context
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Valid credentials (you can expand this to support multiple users)
+const VALID_CREDENTIALS = [
+  { email: 'storeadmin@toolinventory.com', password: 'Admin@123' },
+  { email: 'admin@toolinventory.com', password: 'Admin@123' }
+];
+
+// Auth Provider Component
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Check if user is already logged in on app start
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (isAuthenticated && userEmail) {
+      setUser({
+        email: userEmail,
+        isAuthenticated: true
+      });
+    }
+  }, []);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+    setError('');
 
     try {
-      await login(formData.email, formData.password);
-    } catch (err: any) {
-      console.error('Login error:', err);
-      if (err.code === 'auth/user-not-found' || 
-          err.code === 'auth/wrong-password' || 
-          err.code === 'auth/invalid-credential') {
-        setLoginError('Invalid credentials. Please check your password.');
-      } else if (err.code === 'auth/invalid-email') {
-        setLoginError('Invalid email format.');
-      } else if (err.code === 'auth/too-many-requests') {
-        setLoginError('Too many failed attempts. Please try again later.');
-      } else if (err.code === 'auth/network-request-failed') {
-        setLoginError('Network error. Please check your connection.');
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Find matching credentials
+      const validUser = VALID_CREDENTIALS.find(
+        cred => cred.email === email && cred.password === password
+      );
+
+      if (validUser) {
+        // Login successful
+        const userData: User = {
+          email: email,
+          isAuthenticated: true
+        };
+
+        setUser(userData);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userEmail', email);
       } else {
-        setLoginError(`Login failed: ${err.message}`);
+        // Invalid credentials
+        throw new Error('Invalid credentials. Please check your email and password.');
       }
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    setError('');
+  };
+
+  const value: AuthContextType = {
+    user,
+    login,
+    logout,
+    loading,
+    error
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Shield className="text-white" size={40} />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Store Admin</h1>
-          <p className="text-gray-600">Tool Inventory Management System</p>
-        </div>
-
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
-            <p className="text-gray-600">Please sign in to continue</p>
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs text-blue-800 font-medium">Default Login Credentials:</p>
-              <p className="text-xs text-blue-700">Email: storeadmin@toolinventory.com</p>
-              <p className="text-xs text-blue-700">Password: Admin@123</p>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Admin Email
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-gray-50"
-                  placeholder="Enter admin email"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="Enter your password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {(loginError || error) && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-red-500 rounded-full mr-3"></div>
-                  <p className="text-red-800 text-sm">{loginError || error}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-lg"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing In...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-            <p className="text-xs text-gray-500">
-              Secure access to Tool Inventory Management System
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              © 2025 Tool Inventory System
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-export default LoginForm;
+// Custom hook to use auth
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// Hook to check if user is authenticated
+export const useRequireAuth = () => {
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    if (!user?.isAuthenticated) {
+      // Redirect to login if not authenticated
+      window.location.href = '/login';
+    }
+  }, [user]);
+
+  return user;
+};
+
+// Component to protect routes
+export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+
+  if (!user?.isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Access Denied</h2>
+          <p className="text-gray-600 mb-6">Please log in to access this page.</p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
