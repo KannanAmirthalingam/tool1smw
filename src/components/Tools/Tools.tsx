@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Wrench, Package } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
 import SecurityModal from '../Common/SecurityModal';
+import ImageModal from '../Common/ImageModal';
 import { Tool, ToolCategory, ToolPart } from '../../types';
 
 const Tools: React.FC = () => {
@@ -16,6 +17,7 @@ const Tools: React.FC = () => {
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', toolName: '' });
   const [formData, setFormData] = useState({
     tool_name: '',
     category_id: '',
@@ -158,6 +160,10 @@ const Tools: React.FC = () => {
     setIsSecurityModalOpen(true);
   };
 
+  const handleImageClick = (imageUrl: string, toolName: string) => {
+    setImageModal({ isOpen: true, imageUrl, toolName });
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingTool(null);
@@ -244,7 +250,8 @@ const Tools: React.FC = () => {
                   <img 
                     src={tool.image_url} 
                     alt={tool.tool_name}
-                    className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                    className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => handleImageClick(tool.image_url!, tool.tool_name)}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
@@ -463,6 +470,14 @@ const Tools: React.FC = () => {
         onVerify={securityAction}
         title={securityTitle}
         message={securityMessage}
+      />
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={imageModal.isOpen}
+        onClose={() => setImageModal({ isOpen: false, imageUrl: '', toolName: '' })}
+        imageUrl={imageModal.imageUrl}
+        toolName={imageModal.toolName}
       />
     </div>
   );
