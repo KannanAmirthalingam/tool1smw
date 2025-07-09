@@ -18,12 +18,19 @@ const LoginForm: React.FC = () => {
     try {
       await login(formData.email, formData.password);
     } catch (err: any) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      console.error('Login error:', err);
+      if (err.code === 'auth/user-not-found' || 
+          err.code === 'auth/wrong-password' || 
+          err.code === 'auth/invalid-credential') {
         setLoginError('Invalid credentials. Please check your password.');
+      } else if (err.code === 'auth/invalid-email') {
+        setLoginError('Invalid email format.');
       } else if (err.code === 'auth/too-many-requests') {
         setLoginError('Too many failed attempts. Please try again later.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setLoginError('Network error. Please check your connection.');
       } else {
-        setLoginError('Login failed. Please try again.');
+        setLoginError(`Login failed: ${err.message}`);
       }
     }
   };
@@ -45,6 +52,11 @@ const LoginForm: React.FC = () => {
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
             <p className="text-gray-600">Please sign in to continue</p>
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800 font-medium">Default Login Credentials:</p>
+              <p className="text-xs text-blue-700">Email: storeadmin@toolinventory.com</p>
+              <p className="text-xs text-blue-700">Password: Admin@123</p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -62,10 +74,8 @@ const LoginForm: React.FC = () => {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-gray-50"
                   placeholder="Enter admin email"
                   required
-                  disabled
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Default: storeadmin@toolinventory.com</p>
             </div>
 
             {/* Password Field */}
@@ -91,7 +101,6 @@ const LoginForm: React.FC = () => {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Default password: Admin@123</p>
             </div>
 
             {/* Error Message */}
