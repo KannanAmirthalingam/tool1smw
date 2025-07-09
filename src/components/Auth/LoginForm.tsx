@@ -6,7 +6,7 @@ const LoginForm: React.FC = () => {
   const { login, loading, error } = useAuth();
   const [formData, setFormData] = useState({
     email: 'storeadmin@toolinventory.com',
-    password: ''
+    password: 'Admin@123'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
