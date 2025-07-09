@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Lock, AlertCircle, CheckCircle } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 
 interface SecurityModalProps {
   isOpen: boolean;
@@ -17,7 +16,6 @@ const SecurityModal: React.FC<SecurityModalProps> = ({
   title, 
   message 
 }) => {
-  const { user } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,14 +29,13 @@ const SecurityModal: React.FC<SecurityModalProps> = ({
     // Simulate verification delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // For authenticated users, just verify they entered the correct username
-    if (user && username === 'Admin') {
+    if (username === 'Admin' && password === 'Admin@123') {
       onVerify();
       onClose();
       setUsername('');
       setPassword('');
     } else {
-      setError('Invalid username. Please enter "Admin" to proceed.');
+      setError('Invalid credentials. Please try again.');
     }
     
     setLoading(false);
@@ -75,22 +72,30 @@ const SecurityModal: React.FC<SecurityModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Admin Username
+                Username
               </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter 'Admin' to proceed"
+                placeholder="Enter username"
                 required
               />
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-800 text-sm">
-                <strong>Note:</strong> You are already authenticated. Just enter "Admin" as username to proceed with this action.
-              </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter password"
+                required
+              />
             </div>
 
             {error && (
