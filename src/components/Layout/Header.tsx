@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Bell, User, ChevronDown, Edit3, Phone, Mail, Car as IdCard } from 'lucide-react';
+import { Bell, User, ChevronDown, Edit3, Phone, Mail, Car as IdCard, LogOut, Lock } from 'lucide-react';
 import { useFirestore } from '../../hooks/useFirestore';
-import SecurityModal from '../Common/SecurityModal';
+import { useAuth } from '../../hooks/useAuth';
+import PasswordChangeModal from '../Auth/PasswordChangeModal';
 
 interface HeaderProps {
   title: string;
@@ -21,10 +22,10 @@ interface AdminProfile {
 
 const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
   const { documents: adminProfiles, addDocument: addAdmin, updateDocument: updateAdmin } = useFirestore('admin_profiles');
+  const { logout, user } = useAuth();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
-  const [securityAction, setSecurityAction] = useState<() => void>(() => {});
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -74,21 +75,24 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
   };
 
   const handleSaveProfile = async () => {
-    const action = async () => {
-      try {
-        if (adminProfiles.length > 0) {
-          await updateAdmin(adminProfile.id, formData);
-        } else {
-          await addAdmin({ ...formData, role: 'Admin' });
-        }
-        setShowEditModal(false);
-      } catch (error) {
-        console.error('Error saving admin profile:', error);
+    try {
+      if (adminProfiles.length > 0) {
+        await updateAdmin(adminProfile.id, formData);
+      } else {
+        await addAdmin({ ...formData, role: 'Admin' });
       }
-    };
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error saving admin profile:', error);
+    }
+  };
 
-    setSecurityAction(() => action);
-    setIsSecurityModalOpen(true);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   const handleCloseModal = () => {
@@ -109,6 +113,10 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
           
           <div className="flex items-center space-x-4">
             {/* Notifications */}
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <span>Welcome, {adminProfile.name}</span>
+            </div>
+
             <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors">
               <Bell size={20} />
             </button>
@@ -181,13 +189,29 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
                   </div>
 
                   <div className="p-4 border-t border-gray-200">
-                    <button
-                      onClick={handleEditProfile}
-                      className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <Edit3 size={16} />
-                      <span>Edit Profile</span>
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleEditProfile}
+                        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <Edit3 size={16} />
+                        <span>Edit Profile</span>
+                      </button>
+                      <button
+                        onClick={() => setShowPasswordModal(true)}
+                        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        <Lock size={16} />
+                        <span>Change Password</span>
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        <LogOut size={16} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -301,13 +325,10 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
         </div>
       )}
 
-      {/* Security Modal */}
-      <SecurityModal
-        isOpen={isSecurityModalOpen}
-        onClose={() => setIsSecurityModalOpen(false)}
-        onVerify={securityAction}
-        title="Update Admin Profile"
-        message="Please verify your credentials to update the admin profile."
+      {/* Password Change Modal */}
+      <PasswordChangeModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
       />
 
       {/* Click outside to close dropdown */}
